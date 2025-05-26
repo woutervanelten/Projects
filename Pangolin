@@ -1,0 +1,43 @@
+This info is usable for Pangolin v1.4.0.
+
+It is possible to add EntraID as idP.
+In you EntraID admin page, go to Applications->App registrations and click on New registration.
+Give it a name you like.
+Copy the Application (client) ID to Client ID in Pangolin.
+Click on Client crdentials, Client secrets and click on New client secret. Set the valid time to your liking.
+Copy the Vaule (not secret id) to Client Secret in Pangolin.
+Still in EntraID, go to Token configuration in the created app.
+Click on Add optional claim, select ID. And check email, family_name, given_name, Preferred_username and upn. Then click add.
+Then click Add group claim, check Security groups and make shure that ID, Access and SAML have ID selected. then click save.
+After that, go to API permissions and add a permission.
+Click on Microsoft Graph, Delegated permissions and select email, openid, profile under OpenId permissions.
+Also select GroupMember.ReadAll under GroupMember and User.Read under User.
+Don't forget to click on the Grant admin consent for ***
+Go back to Overview of the app.
+Copy the Directory (tenant) ID.
+Authorization URL = https://login.microsoftonline.com/{tenantID}/oauth2/v2.0/authorize
+Token URL = https://login.microsoftonline.com/{tenantID}/oauth2/v2.0/token
+
+Once all created in Pangolin, Pangolin will give you the redirect URL.
+Add this url in EntraID to Redirect URIs (top right) and choos WEB.
+
+Now in Pangolin under you idP,
+Check Auto Provision Users (if you want that).
+And set the Identifier Path to oid, Emil Path to email, Name Path to name and Scopes to openid profile email.
+Don't forget to click Save.
+
+Under Organisation Policies, Create a Organization Policy.
+Choose the Organisation that you want the users to be added to (if Auto Provision Users is checked).
+
+For your Role mapping path, enter: join('', [   contains(groups, '***AAA***') && 'Admin' || '',   (!contains(groups, '***AAA***') && contains(groups, '***MMM***')) && 'Member' || '' ]) || `false`
+Replace ***AAA*** with the group ID of your Admin user group of EntraID.
+Replace ***MMM*** with the group ID of your users group in EntraID.
+Don't forget to keep the ' signs
+
+For the Organization mapping path, enter: tid == '***TID***'
+Replace ***TID*** with your TenantID.
+
+Now, Once a user loggs in with EntraID, the user is added to the Admin role If the user is part of the Admin group you selected.
+If the user is part of the selected user group, it is added to Member.
+If it is part of both, it is added to Admin.
+If it is part of none, than it isn't added to the Organization.
